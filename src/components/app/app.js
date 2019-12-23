@@ -5,28 +5,34 @@ import TodoList from '../todo-list';
 import TaskSelect from '../tasks-select';
 import SummaryTasks from '../summary-tasks';
 import "./app.css"
+import NewTaskInput from '../new-task-input';
+import { throwStatement } from '../../../node_modules/@babel/types';
 
 export default class App extends Component {
-    initialState = {
-        done: false,
-        important: false
-    }
-
     todoData = [
         {
             id: 0,
             label : 'Make coffee',
-            currentState: this.initialState
+            currentState: {
+                done: false,
+                important: false
+            }
         },
         {
             id: 1,
             label : 'Drink coffee',
-            currentState: this.initialState
+            currentState: {
+                done: false,
+                important: false
+            }
         },
         {
             id: 2,
             label : 'Sleep',
-            currentState: this.initialState
+            currentState: {
+                done: false,
+                important: false
+            }
         },
     ];
 
@@ -37,6 +43,7 @@ export default class App extends Component {
     addData = (insertElement) => {
         this.setState((state) => {
             const currentId = Math.max(state.currentData.map(task => task.id)) + 1
+            console.log(currentId)
             insertElement.id = currentId
             const updatedState = [...state.currentData, insertElement]
             return {
@@ -52,6 +59,18 @@ export default class App extends Component {
                 currentData: updatedState
             }
         })
+    }
+
+    toggleImportant = (id) => {
+        var currentTask =  this.todoData.find(task => task.id === id)
+        currentTask.currentState.important = !currentTask.currentState.important
+        this.changeData(currentTask)
+    }
+
+    toggleDone = (id) => {
+        var currentTask =  this.todoData.find(task => task.id === id)
+        currentTask.currentState.done = !currentTask.currentState.done
+        this.changeData(currentTask)
     }
 
     changeData = (changedTask) => {
@@ -92,7 +111,8 @@ export default class App extends Component {
                     <SearchPanel addedClass = "col"/>
                     <TaskSelect addedClass = "col"/>
                 </div>
-                <TodoList todoData = {this.state.currentData} onDeleted = {this.deleteData} onChanged = {this.changeData}/>
+                <TodoList todoData = {this.state.currentData} onDeleted = {this.deleteData} onToggleDone={this.toggleDone} onToggleImportant={this.toggleImportant}/>
+                <NewTaskInput onCreated={this.addData}/>
             </div>
         );
     }
