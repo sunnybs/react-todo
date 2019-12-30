@@ -6,13 +6,12 @@ import TaskSelect from '../tasks-select';
 import SummaryTasks from '../summary-tasks';
 import "./app.css"
 import NewTaskInput from '../new-task-input';
-import { throwStatement } from '../../../node_modules/@babel/types';
 
 export default class App extends Component {
     todoData = [
         {
             id: 0,
-            label : 'Make coffee',
+            label: 'Make coffee',
             currentState: {
                 done: false,
                 important: false
@@ -20,7 +19,7 @@ export default class App extends Component {
         },
         {
             id: 1,
-            label : 'Drink coffee',
+            label: 'Drink coffee',
             currentState: {
                 done: false,
                 important: false
@@ -28,7 +27,7 @@ export default class App extends Component {
         },
         {
             id: 2,
-            label : 'Sleep',
+            label: 'Sleep',
             currentState: {
                 done: false,
                 important: false
@@ -37,13 +36,17 @@ export default class App extends Component {
     ];
 
     state = {
-        currentData: this.todoData
+        currentData: this.todoData,
+        searchRequest: "",
+        showOnlyActive: false,
+        showOnlyDone: false
     }
 
     addData = (insertElement) => {
         this.setState((state) => {
-            const currentId = Math.max(state.currentData.map(task => task.id)) + 1
-            console.log(currentId)
+            const ids = state.currentData.map(task => task.id);
+            const currentId = ids.length !== 0 ? 
+                Math.max.apply(null, state.currentData.map(task => task.id)) + 1 : 0
             insertElement.id = currentId
             const updatedState = [...state.currentData, insertElement]
             return {
@@ -62,13 +65,13 @@ export default class App extends Component {
     }
 
     toggleImportant = (id) => {
-        var currentTask =  this.todoData.find(task => task.id === id)
+        var currentTask = this.state.currentData.find(task => task.id === id)
         currentTask.currentState.important = !currentTask.currentState.important
         this.changeData(currentTask)
     }
 
     toggleDone = (id) => {
-        var currentTask =  this.todoData.find(task => task.id === id)
+        var currentTask = this.state.currentData.find(task => task.id === id)
         currentTask.currentState.done = !currentTask.currentState.done
         this.changeData(currentTask)
     }
@@ -100,19 +103,40 @@ export default class App extends Component {
         return this.state.currentData.filter(item => !item.currentState.done).length
     }
 
-    render(){
+    setTasksSelectType = (showOnlyActive, showOnlyDone) => {
+        this.setState({
+            showOnlyActive: showOnlyActive,
+            showOnlyDone: showOnlyDone
+        });
+    }
+
+    setTasksSearchRequest = (searchRequest) => {
+        this.setState({
+            searchRequest: searchRequest
+        });
+    }
+
+    render() {
+        const { searchRequest, showOnlyActive, showOnlyDone, currentData } = this.state;
+        let dataToRender = currentData.filter(task => task.label.toLowerCase().includes(searchRequest.toLowerCase()));
+        if (showOnlyActive)
+            dataToRender = dataToRender.filter(task => !task.currentState.done)
+
+        if (showOnlyDone)
+            dataToRender = dataToRender.filter(task => task.currentState.done)
+
         return (
             <div className="app container">
-                <div className="row"> 
-                    <AppHeader addedClass = "col"/>
-                    <SummaryTasks addedClass ="col" todoTasksCount = {this.getUndoneTasksCount()} doneTasksCount ={this.getDoneTasksCount()}/>
+                <div className="row">
+                    <AppHeader addedClass="col" />
+                    <SummaryTasks addedClass="col" todoTasksCount={this.getUndoneTasksCount()} doneTasksCount={this.getDoneTasksCount()} />
                 </div>
                 <div className="row">
-                    <SearchPanel addedClass = "col"/>
-                    <TaskSelect addedClass = "col"/>
+                    <SearchPanel addedClass="col" onTextEntered={this.setTasksSearchRequest}/>
+                    <TaskSelect addedClass="col" onSelected={this.setTasksSelectType}/>
                 </div>
-                <TodoList todoData = {this.state.currentData} onDeleted = {this.deleteData} onToggleDone={this.toggleDone} onToggleImportant={this.toggleImportant}/>
-                <NewTaskInput onCreated={this.addData}/>
+                <TodoList todoData={dataToRender} onDeleted={this.deleteData} onToggleDone={this.toggleDone} onToggleImportant={this.toggleImportant} />
+                <NewTaskInput onCreated={this.addData} />
             </div>
         );
     }

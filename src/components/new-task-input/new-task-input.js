@@ -29,10 +29,10 @@ export default class NewTaskInput extends Component {
 
     render() {
         return (
-            <div class="input-group mt-3">
-                <input type="text" class="form-control" value={this.state.enteredText} onChange={this.onTextEntered} placeholder="Enter new task" />
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button" onClick={this.createElement}>Create!</button>
+            <div className="input-group mt-3">
+                <input type="text" className="form-control" value={this.state.enteredText} onChange={this.onTextEntered} placeholder="Enter new task" />
+                <div className="input-group-append">
+                    <button className="btn btn-outline-secondary" type="button" onClick={this.createElement}>Create!</button>
                 </div>
             </div>
         );
